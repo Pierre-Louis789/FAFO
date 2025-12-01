@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>F-A-F-O</title>
-  <meta name="description" content="LogicLine is an immersive word deduction game. Guess the hidden word, earn points, and unlock clues in a cinematic arcade-style experience."/>
+  <meta name="description" content="FAFO is an immersive word deduction game. Guess the hidden word, earn points, and unlock clues in a cinematic arcade-style experience."/>
   <link rel="stylesheet" href="assets/style.css"/>
   <!-- Preload optional arcade font if you want -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -55,33 +55,34 @@
       <button class="nav-btn" id="btn-howto">❓ How to Play</button>
       <button class="nav-btn" id="btn-leaderboard">🏆 Leaderboard</button>
       <button class="nav-btn" id="btn-points">💰 Game History</button>
-      <div class="mode-toggle" role="group" aria-label="Game mode">
+      <div id="mode-toggle" class="mode toggle" role="group" aria-label="Game mode">
         <button class="nav-btn" id="btn-daily">📅 Daily</button>
         <button class="nav-btn" id="btn-random">🎲 Random</button>
       </div>
       <button class="nav-btn" id="nav-sound-toggle">🔊 Sound On</button>
+      
     </nav>
 
+    <div id="mobile-score"></div>
     <!-- Main Game Area -->
     <main id="game-area">
       <section id="game-grid" aria-label="Word grid">
         <!-- Rows generated dynamically -->
       </section>
-      <button id="new-game-btn" class="nav-btn hidden">🔄 New Game</button>
 
       <!-- Keyboard -->
       <section id="keyboard" aria-label="On-screen keyboard" role="application">
-        <div class="key-row" aria-label="Top row keys">
+        <div class="key-row top-row" aria-label="Top row keys">
           <button class="key" data-key="Q">Q</button><button class="key" data-key="W">W</button><button class="key" data-key="E">E</button><button class="key" data-key="R">R</button><button class="key" data-key="T">T</button><button class="key" data-key="Y">Y</button><button class="key" data-key="U">U</button><button class="key" data-key="I">I</button><button class="key" data-key="O">O</button><button class="key" data-key="P">P</button>
         </div>
-        <div class="key-row" aria-label="Home row keys">
+        <div class="key-row middle-row" aria-label="Home row keys">
           <button class="key" data-key="A">A</button><button class="key" data-key="S">S</button><button class="key" data-key="D">D</button><button class="key" data-key="F">F</button><button class="key" data-key="G">G</button><button class="key" data-key="H">H</button><button class="key" data-key="J">J</button><button class="key" data-key="K">K</button><button class="key" data-key="L">L</button>
         </div>
-        <div class="key-row" aria-label="Bottom row keys">
+        <div class="key-row bottom-row" aria-label="Bottom row keys">
           <button class="key" data-key="Z">Z</button><button class="key" data-key="X">X</button><button class="key" data-key="C">C</button><button class="key" data-key="V">V</button><button class="key" data-key="B">B</button><button class="key" data-key="N">N</button><button class="key" data-key="M">M</button>
         </div>
       </section>
-      <div class="key-row" aria-label="Bottom row keys">
+      <div class="key-row action-row" aria-label="Bottom row keys">
       <button class="key wide" data-key="Backspace">⌫</button>
       <button class="key wide" data-key="Enter">Enter</button>
       </div>
@@ -97,17 +98,19 @@
         <h2>Buy a Clue</h2>
         <p>Spend your points to reveal a letter:</p>
         <div class="clue-options">
-          <button class="clue-btn" data-cost="3" data-type="reveal-position">
-            🔠 Reveal letter at position <span class="cost">3 pts</span>
+          <button class="clue-btn" data-cost="10" data-type="reveal-position">
+            <span>Reveal 1 Letter</span>
+            <span class="cost">10 pts</span>
           </button>
-          <button class="clue-btn" data-cost="4" data-type="reveal-random">
-            🎲 Reveal random letter <span class="cost">4 pts</span>
+          <button class="clue-btn" data-cost="10" data-type="reveal-first">
+            <span>Reveal First Letter</span>
+            <span class="cost">15 pts</span>
           </button>
-          <button class="clue-btn" data-cost="5" data-type="reveal-vowel">
-            🧪 Reveal a vowel <span class="cost">5 pts</span>
-          </button>
+          <button class="clue-btn" data-cost="10" data-type="reveal-last">
+            <span>Reveal Last Letter</span>
+            <span class="cost">15 pts</span>
         </div>
-        <p id="clue-feedback" class="clue-result" aria-live="polite"></p>
+          <p id="clue-feedback-desktop" class="clue-result" aria-live="polite"></p>
       </section>
 
       <section id="dynamic-panel" aria-live="polite">
@@ -115,9 +118,37 @@
       </section>
     </aside>
 
+
+<!-- Trigger icon -->
+<button id="btn-clue-popup" class="clue-icon">💡</button>
+
+<!-- Clue Popup for Mobile -->
+<div id="clue-popup" class="hidden" role="dialog" aria-modal="true" aria-labelledby="clue-title">
+  <div class="popup-content">
+    <h2 id="clue-title">🔮 Buy a Clue</h2>
+    <button class="clue-btn" data-cost="10" data-type="reveal-position">
+      <span>Reveal 1 Letter</span>
+      <span class="cost">10 pts</span>
+    </button>
+    <button class="clue-btn" data-cost="10" data-type="reveal-first">
+      <span>Reveal First Letter</span>
+      <span class="cost">15 pts</span>
+    </button>
+    <button class="clue-btn" data-cost="10" data-type="reveal-last">
+      <span>Reveal Last Letter</span>
+      <span class="cost">15 pts</span>
+
+    </button>
+    <div class="clue-result" id="clue-feedback-mobile"></div>
+    <button id="close-clue-popup">Close</button>
+  </div>
+</div>
+
+
+
     <!-- How to Play modal -->
     <div id="modal-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <div id="modal-content">
+      <div class="modal-content">
         <h2 id="modal-title">How to Play</h2>
         <p>Guess the word in 6 tries. Each guess gives feedback:</p>
         <ul>
@@ -129,31 +160,29 @@
       </div>
     </div>
 
-    <div id="modal-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+ <!-- Leaderboard Modal -->
+<div id="leaderboard-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="leaderboard-title">
   <div class="modal-content">
-    <h2>Game History</h2>
-    <p>Your recent games will appear here.</p>
-    <button id="close-modal">Close</button>
+    <h2 id="leaderboard-title">🏆 Leaderboard</h2>
+    <div id="leaderboard-content"></div>
+    <button id="close-leaderboard">Close</button>
+  </div>
+</div>
+
+<!-- Game History Modal -->
+<div id="history-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="history-title">
+  <div class="modal-content">
+    <h2 id="history-title">📜 Game History</h2>
+    <div id="history-content"></div>
+    <button id="close-history">Close</button>
   </div>
 </div>
 
 
-    <!-- Leaderboard Modal -->
-    <div id="leaderboard-modal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="leaderboard-title">
-      <div class="modal-content">
-        <h2 id="leaderboard-title">🎉 You Guessed It!</h2>
-        <p>Enter your name for the leaderboard:</p>
-        <input type="text" id="player-name-input" maxlength="20" aria-label="Player name"/>
-        <div class="modal-buttons">
-          <button id="save-name-btn">Save</button>
-          <button id="skip-name-btn">Skip</button>
-        </div>
-      </div>
-    </div>
 
     <!-- Footer -->
     <footer id="footer" role="contentinfo">
-      <p>© 2025 LogicLine | Built with ❤️ for immersive play</p>
+      <p>© 2025 FAFO | Built with ❤️ for immersive play</p>
     </footer>
   </div>
 
@@ -162,12 +191,16 @@
     <div id="endgame-content">
       <h2 id="endgame-title"></h2>
       <p id="endgame-message"></p>
+
+      <!-- New player name input -->
+    <input id="player-name-input" type="text" placeholder="Enter your name" />
       <div class="endgame-buttons">
         <button id="continue-btn" class="nav-btn">Continue</button>
         <button id="restart-btn" class="nav-btn">Restart</button>
       </div>
     </div>
   </div>
+ 
 
   <script src="data/wordBank.js"></script>
   <script src="script.js"></script>

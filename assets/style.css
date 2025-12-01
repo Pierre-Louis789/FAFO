@@ -240,7 +240,6 @@ body {
 
 /* Tile animations */
 .tile.flip { animation: flipTile 0.6s ease forwards; }
-
 @keyframes flipTile {
   0%   { transform: rotateX(0); }
   50%  { transform: rotateX(90deg); }
@@ -252,7 +251,9 @@ body {
   to   { box-shadow: 0 0 20px #00f5d4; }
 }
 
-/* Keyboard layout */
+/* ==========================================================
+   🎯 Keyboard Layout
+   ========================================================== */
 #keyboard {
   display: flex;
   flex-direction: column;
@@ -436,12 +437,11 @@ body {
 /* ==========================================================
    📢 Modal (How to Play)
    ========================================================== */
-
 #modal-overlay {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background-color: rgba(13, 13, 26, 0.9);
+  background-color: rgba(13, 13, 26, 0.9); /* dark translucent backdrop */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -454,7 +454,8 @@ body {
 #modal-overlay.hidden { display: none !important; }
 .hidden { display: none; }
 
-#modal-content {
+/* Shared modal box styling */
+.modal-content {
   background-color: #1a1a2e;
   border: 2px solid #ff2e63;
   padding: 20px;
@@ -468,10 +469,12 @@ body {
   transform: scale(0.95);
   transition: transform 0.3s ease;
 }
-#modal-content h2 {
+.modal-content h2 {
   color: #00f5d4;
   margin-bottom: 10px;
 }
+
+/* Close button (How to Play) */
 #close-modal {
   margin-top: 10px;
   padding: 8px 16px;
@@ -484,6 +487,7 @@ body {
 }
 #close-modal:hover { background-color: #ff9f1c; }
 
+/* Optional button group inside modals */
 .modal-buttons {
   display: flex;
   justify-content: center;
@@ -500,11 +504,169 @@ body {
   from { opacity: 0; transform: scale(0.95); }
   to   { opacity: 1; transform: scale(1); }
 }
-#modal-overlay:focus-within {
+#modal-overlay:focus-within { outline: 2px solid #00f5d4; }
+
+/* ==========================================================
+   📜 Leaderboard & History Modal Overlays
+   ========================================================== */
+#leaderboard-overlay,
+#history-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(13, 13, 26, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+#leaderboard-overlay.active,
+#history-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+#leaderboard-overlay.hidden,
+#history-overlay.hidden {
+  display: none !important;
+}
+
+/* Inner content areas (where JS injects data) */
+#leaderboard-content,
+#history-content {
+  margin-top: 15px;
+  font-size: 0.95rem;
+  color: #ddd;
+}
+
+/* Headings inside Leaderboard & History */
+#leaderboard-overlay h2,
+#history-overlay h2 {
+  color: #00f5d4;
+  margin-bottom: 10px;
+}
+
+/* Close buttons for Leaderboard & History */
+#close-leaderboard,
+#close-history {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #ff2e63;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+#close-leaderboard:hover,
+#close-history:hover {
+  background-color: #ff9f1c;
+}
+
+/* Focus outlines for accessibility */
+#leaderboard-overlay:focus-within,
+#history-overlay:focus-within {
   outline: 2px solid #00f5d4;
 }
 
-/* Shake animation for errors */
+/* ==========================================================
+   🏆 Leaderboard card
+   ========================================================== */
+.leaderboard-card {
+  background: #1a1a2e;
+  border: 2px solid #3a3a3c;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  transition: transform 0.2s ease;
+}
+.leaderboard-card:hover {
+  transform: translateY(-2px);
+}
+.leaderboard-card.top1 {
+  border-color: gold;
+  box-shadow: 0 0 12px gold;
+}
+.leaderboard-card.top2 {
+  border-color: silver;
+  box-shadow: 0 0 12px silver;
+}
+.leaderboard-card.top3 {
+  border-color: #cd7f32; /* bronze */
+  box-shadow: 0 0 12px #cd7f32;
+}
+.leaderboard-card h3 {
+  margin-bottom: 6px;
+  font-size: 1.1rem;
+}
+.leaderboard-card .score {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: #00f5d4;
+}
+
+/* ==========================================================
+   📜History card
+    ========================================================== */ 
+.history-card {
+  background: #1a1a2e;
+  border: 2px solid #3a3a3c;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  transition: transform 0.2s ease;
+}
+.history-card:hover {
+  transform: translateY(-2px);
+}
+.history-card.win {
+  border-color: #00f5d4;
+  box-shadow: 0 0 12px #00f5d4;
+}
+.history-card.loss {
+  border-color: #ff2e63;
+  box-shadow: 0 0 12px #ff2e63;
+}
+.history-card h3 {
+  margin-bottom: 6px;
+  font-size: 1.1rem;
+}
+.history-card .date {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+/* Player name input */
+#player-name-input {
+  display: none; /* Initially hidden, shown via JS when needed */
+  margin: 10px auto 20px auto;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 2px solid #00f5d4;
+  background-color: #0d0d1a;
+  color: #fff;
+  font-size: 1rem;
+  text-align: center;
+  width: 80%;
+}
+#player-name-input:focus {
+  outline: none;
+  border-color: #ff2e63;
+  box-shadow: 0 0 8px #ff2e63;
+}
+
+/* ==========================================================
+   ⚡ Shake animation (for invalid input feedback)
+   ========================================================== */
 .shake { animation: shake 0.3s; }
 @keyframes shake {
   0%   { transform: translateX(0); }
@@ -514,11 +676,6 @@ body {
   100% { transform: translateX(0); }
 }
 
-/* Reset list styles */
-ul {
-  list-style-type: none;
-  padding-left: 0;
-}
 
 /* ==========================================================
    🏆 Endgame Overlay
@@ -593,10 +750,10 @@ ul {
 }
 
 /* ==========================================================
-   📱 Mobile App Layout (3-Stage Arcade Experience)
+   📱 Mobile Layout — Arcade Experience
    ========================================================== */
 @media (max-width: 768px) {
-  /* App wrapper becomes vertical stack */
+  /* Main wrapper: vertical flow, scrollable */
   #app-wrapper {
     display: flex;
     flex-direction: column;
@@ -607,7 +764,7 @@ ul {
     padding: 0;
   }
 
-  /* Top nav bar with icons only */
+  /* Top navigation bar */
   #top-nav {
     display: flex;
     justify-content: space-around;
@@ -618,6 +775,7 @@ ul {
     border-bottom: 1px solid rgba(255,255,255,0.1);
   }
 
+  /* Icon-only buttons */
   .nav-icon {
     background: none;
     border: none;
@@ -626,7 +784,7 @@ ul {
     cursor: pointer;
   }
 
-  /* Compact nav for in-game mode */
+  /* Compact nav mode */
   #top-nav.compact-nav .nav-btn {
     padding: 6px;
     font-size: 1.2rem;
@@ -637,7 +795,7 @@ ul {
     box-shadow: none;
   }
 
-  /* Mode selection screen (Daily / Random) */
+  /* Mode selector layout */
   #mode-select {
     display: flex;
     flex-direction: column;
@@ -646,7 +804,8 @@ ul {
     margin: 20px 0;
   }
 
-  .mode-btn {
+  /* Navigation buttons */
+  .nav-btn {
     padding: 1rem 2rem;
     font-size: 1.2rem;
     font-weight: bold;
@@ -656,6 +815,11 @@ ul {
     border: none;
     box-shadow: 0 4px 12px rgba(0, 245, 212, 0.3);
     cursor: pointer;
+    transition: background 0.2s ease, box-shadow 0.3s ease;
+  }
+
+  .nav-btn:hover {
+    transform: translateY(-2px);
   }
 
   /* Game grid layout */
@@ -681,135 +845,210 @@ ul {
     border-radius: 6px;
   }
 
-  /* Mobile keyboard layout */
-
- #keyboard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 0 10px;
-  width: 100%;
-  max-width: 420px;
-  margin: 0 auto 20px auto;
-  box-sizing: border-box;
-}
-
-.key-row {
-  display: flex;
-  justify-content: center;
-  grid-template-columns: repeat(10, 1fr); /* Fits QWERTY layout */
-  gap: 4px;
-  width: 100%;
-  flex-wrap: wrap;
-}
-
-.key {
-  flex: 0 0 calc (10% - 4px); /* Approx 10 keys per row */
-  max-width: 38px;
-  height: 48px;
-  font-size: 1rem;
-  font-weight: bold;
-  border-radius: 6px;
-  background-color: #1a1a2e;
-  color: #fff;
-  border: 2px solid #3a3a3c;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  text-align: center;
-}
-
-.key:hover {
-  background-color: #ff2e63;
-  color: #fff;
-}
-
-.key.wide {
-  grid-column: span 2;
-  height: 48px;
-  font-size: 1rem;
-  font-weight: bold;
-  background: linear-gradient(135deg, #ff2e63, #ff6f91);
-  color: #fff;
-  border: 2px solid #ff2e63;
-  box-shadow: 0 0 8px rgba(255, 46, 99, 0.5);
-  border-radius: 15px;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.key.wide:hover {
-  background-color: #ff2e63;
-  box-shadow: 0 0 12px rgba(255, 46, 99, 0.8);
-}
-
-
   /* Hide sidebar on mobile */
   #sidebar {
     display: none !important;
   }
 
-  #leaderboard-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(13, 13, 26, 0.95);
-  display: none; /* hidden by default */
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
+  /* Floating score display */
+  #mobile-score {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: #0d0d1a;
+    color: #00f5d4;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    z-index: 1000;
+    box-shadow: 0 0 8px #00f5d4;
+  }
 }
 
-#leaderboard-modal .modal-content {
-  background: #1a1a2e;
-  padding: 20px;
-  border-radius: 8px;
+/* ==========================================================
+   🎯 Mobile Keyboard — Responsive & Arcade-Polished
+   ========================================================== */
+@media (max-width: 768px) {
+  #keyboard {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 0 8px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .key-row {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 6px;
+  margin-bottom: 8px;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+}
+  /* Middle row offset (like real QWERTY) */
+.middle-row {
+  padding-left: 6%;
+  grid-template-columns: repeat(9, 1fr);
+}
+/* Bottom row offset */
+.bottom-row {
+  padding-left: 12%;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+/* Action row for wide buttons */
+.action-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.key {
+  height: 48px;
+  font-size: 1rem;
+  font-weight: bold;
+  background-color: #1a1a2e;
   color: #fff;
-  max-width: 90%;
+  border: 2px solid #3a3a3c;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 6px rgba(0, 245, 212, 0.3);
   text-align: center;
 }
 
 
-  #leaderboard-modal,
-#modal-overlay,
-#dynamic-panel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
+  .key:hover {
+    background-color: #ff2e63;
+    box-shadow: 0 0 12px #ff2e63;
+  }
+
+  .key:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 6px #ff2e63;
+  }
+
+  /* Wide keys */
+.key.wide {
+  min-width: 80px;
+  padding: 0 12px;
+  font-size: 1.1rem;
   background-color: #0d0d1a;
-  color: #fff;
-  z-index: 999;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  border-color: #00f5d4;
+  box-shadow: 0 0 12px #00f5d4;
 }
 
 
-#history-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(13, 13, 26, 0.95);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
+  .key.wide:hover {
+    background-color: #00f5d4;
+    color: #0d0d1a;
+    box-shadow: 0 0 16px #00f5d4;
+  }
 
+  /* Key feedback states */
+  .key.correct {
+    background-color: #00f5d4;
+    color: #0d0d1a;
+    border-color: #00f5d4;
+    box-shadow: 0 0 12px #00f5d4;
+  }
+
+  .key.present {
+    background-color: #ff9f1c;
+    color: #0d0d1a;
+    border-color: #ff9f1c;
+    box-shadow: 0 0 12px #ff9f1c;
+  }
+
+  .key.absent {
+    background-color: #3a3a3c;
+    color: #888;
+    border-color: #3a3a3c;
+    box-shadow: none;
+  }
+
+  .key:focus {
+    outline: 2px solid #00f5d4;
+    outline-offset: 2px;
+  }
 }
 
 /* ==========================================================
-   📱 Small Phones Layout
+   🔮 Mobile Clue Popup
+   ========================================================== */
+#clue-popup {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #1a1a2e;
+  border-top: 3px solid #ff2e63;
+  border-radius: 12px 12px 0 0;
+  padding: 20px;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+
+#clue-popup.active {
+  transform: translateY(0);
+}
+
+.popup-content {
+  text-align: center;
+}
+
+.clue-icon {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #ff2e63;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  padding: 15px;
+  cursor: pointer;
+  box-shadow: 0 0 10px #ff2e63;
+}
+
+#close-clue-popup {
+  margin-top: 15px;
+  padding: 8px 16px;
+  background-color: #ff2e63;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+/* ==========================================================
+   🧠 Responsive Visibility Rules
+   ========================================================== */
+/* Desktop only */
+@media (min-width: 769px) {
+  #sidebar { display: flex; }
+  #clue-popup,
+  #btn-clue-popup { display: none !important; }
+}
+
+/* Mobile only */
+@media (max-width: 768px) {
+  #sidebar { display: none; }
+  #clue-popup,
+  #btn-clue-popup { display: block; }
+}
+
+/* ==========================================================
+   📱 Small Phones Layout (≤480px)
    ========================================================== */
 @media (max-width: 480px) {
+  /* Wrapper stays vertical and scrollable */
   #app-wrapper {
     display: flex;
     flex-direction: column;
@@ -820,11 +1059,13 @@ ul {
     padding: 0;
   }
 
+  /* Grid rows shrink slightly */
   .guess-row {
     grid-template-columns: repeat(5, minmax(40px, 1fr));
     gap: 4px;
   }
 
+  /* Tiles scale down */
   .tile {
     height: 48px;
     font-size: 1.4rem;
@@ -832,42 +1073,48 @@ ul {
     border-radius: 5px;
   }
 
+  /* Keyboard narrower for small screens */
   #keyboard {
     max-width: 380px;
     padding: 0 6px;
-}
+  }
 
-.key-row {
-  grid-template-columns: repeat(10, 1fr);
-  gap: 3px;
-  max-width: 360px;
-  margin: 0 auto;
-}
+  /* Key rows tighter */
+  .key-row {
+    grid-template-columns: repeat(10, 1fr);
+    gap: 3px;
+    max-width: 360px;
+    margin: 0 auto;
+  }
 
-.key {
-  height: 42px;
-  font-size: 0.9rem;
-  flex: 0 0 calc(10% - 3px);
-  max-width: 34px;
-}
+  /* Keys smaller but still tappable */
+  .key {
+    height: 42px;
+    font-size: 0.9rem;
+    flex: 0 0 calc(10% - 3px);
+    max-width: 34px;
+  }
 
-.key.wide {
-  flex: 0 0 calc(20% - 3px);
-  max-width: 70px;
-  height: 42px;
-}
+  /* Wide keys (Enter, Backspace) scale proportionally */
+  .key.wide {
+    flex: 0 0 calc(20% - 3px);
+    max-width: 70px;
+    height: 42px;
+  }
 
-
+  /* Sidebar spacing if shown */
   #sidebar {
     margin-top: 0.75rem;
     gap: 16px;
   }
 
+  /* Header text shrinks */
   #main-header h1 {
     font-size: 1.6rem;
     text-shadow: 0 0 6px rgba(255, 46, 99, 0.6);
   }
 
+  /* Modal content fits screen width */
   #modal-content {
     width: 95%;
     padding: 12px;

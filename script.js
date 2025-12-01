@@ -1,90 +1,67 @@
 // ===========================
-// 🕹️ LogicLine Game Script
+// 🕹️ FAFO Game Script
 // ===========================
 
 document.addEventListener("DOMContentLoaded", () => {
-
   // ===========================
   // 🧩 DOM References
   // ===========================
   const grid = document.getElementById("game-grid");
   const scoreDisplay = document.getElementById("score");
-  const modal = document.getElementById("modal-overlay");
-  const howToBtn = document.getElementById("btn-howto");
-  const closeModalBtn = document.getElementById("close-modal");
-  const clueButtons = document.querySelectorAll(".clue-btn");
-  const clueFeedback = document.getElementById("clue-feedback");
   const keys = document.querySelectorAll(".key");
-  const dynamicPanel = document.getElementById("dynamic-panel");
-  const leaderboardBtn = document.getElementById("btn-leaderboard");
-  const pointsBtn = document.getElementById("btn-points");
-  const newGameBtn = document.getElementById("new-game-btn");
 
-  const leaderboardModal = document.getElementById("leaderboard-modal");
-  const playerNameInput = document.getElementById("player-name-input");
-  const saveNameBtn = document.getElementById("save-name-btn");
-  const skipNameBtn = document.getElementById("skip-name-btn");
+  // Overlays
+  const leaderboardOverlay = document.getElementById("leaderboard-overlay");
+  const historyOverlay = document.getElementById("history-overlay");
+  const leaderboardContent = document.getElementById("leaderboard-content");
+  const historyContent = document.getElementById("history-content");
+  const btnLeaderboard = document.getElementById("btn-leaderboard");
+  const btnPoints = document.getElementById("btn-points");
+  const closeLeaderboard = document.getElementById("close-leaderboard");
+  const closeHistory = document.getElementById("close-history");
 
+  // How to Play modal
+  const modalOverlay = document.getElementById("modal-overlay");
+  const btnHowto = document.getElementById("btn-howto");
+  const closeModal = document.getElementById("close-modal");
+
+  // Clues (desktop + mobile)
+  const clueButtons = document.querySelectorAll(".clue-btn");
+  const clueFeedbackMobile = document.getElementById("clue-feedback-mobile");
+  const clueFeedbackDesktop = document.getElementById("clue-feedback-desktop");
+  const cluePopup = document.getElementById("clue-popup");
+  const btnCluePopup = document.getElementById("btn-clue-popup");
+  const closeCluePopup = document.getElementById("close-clue-popup");
+
+  // Name input 
+  const nameInput = document.getElementById("player-name-input");
+  const playerName = nameInput.value || "Anonymous";
+
+  // Score panel
+  const scorePanel = document.getElementById("score-panel");
+
+  // Endgame overlay
   const endgameOverlay = document.getElementById("endgame-overlay");
   const endgameTitle = document.getElementById("endgame-title");
   const endgameMessage = document.getElementById("endgame-message");
   const continueBtn = document.getElementById("continue-btn");
   const restartBtn = document.getElementById("restart-btn");
 
+  // Layout / nav
   const dateTimeEl = document.getElementById("date-time");
   const introScreen = document.getElementById("intro-screen");
   const startBtn = document.getElementById("start-btn");
-
-  // Sound toggles
-  const introSoundToggle = document.getElementById("sound-toggle");
-  const navSoundToggle = document.getElementById("nav-sound-toggle");
-  const bgMusic = document.getElementById("bg-music");
+  const topNav = document.getElementById("top-nav");
+  const keyboard = document.getElementById("keyboard");
 
   // Mode buttons
   const btnDaily = document.getElementById("btn-daily");
   const btnRandom = document.getElementById("btn-random");
 
-
-
-  // ===========================
-  // 📅 Daily Puzzle Tracking
-  // ===========================
-  function hasPlayedToday() {
-    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-    return localStorage.getItem("dailyPlayed") === today;
-  }
-
-  function markDailyPlayed() {
-    const today = new Date().toISOString().slice(0, 10);
-    localStorage.setItem("dailyPlayed", today);
-  }
-
-  // ===========================
-  // 🔊 Sound Effects + Music
-  // ===========================
-  let soundOn = true;
-
-  const sounds = {
-    correct: new Audio("assets/sounds/correct.mp3"),
-    present: new Audio("assets/sounds/present.mp3"),
-    absent: new Audio("assets/sounds/absent.mp3"),
-    clue: new Audio("assets/sounds/clue.mp3"),
-  };
-
-  function updateSoundButtons() {
-    const label = soundOn ? "🔊 Sound On" : "🔇 Sound Off";
-    if (introSoundToggle) introSoundToggle.textContent = label;
-    if (navSoundToggle) navSoundToggle.textContent = label;
-  }
-
-  function toggleSound() {
-    soundOn = !soundOn;
-    if (soundOn) bgMusic.play(); else bgMusic.pause();
-    updateSoundButtons();
-  }
-
-  introSoundToggle?.addEventListener("click", toggleSound);
-  navSoundToggle?.addEventListener("click", toggleSound);
+  // Sound
+  const introSoundToggle = document.getElementById("sound-toggle");
+  const navSoundToggle = document.getElementById("nav-sound-toggle");
+  const bgMusic = document.getElementById("bg-music");
 
   // ===========================
   // 📅 Date Label
@@ -93,75 +70,45 @@ document.addEventListener("DOMContentLoaded", () => {
     const today = new Date().toLocaleDateString("en-GB", {
       weekday: "short", day: "numeric", month: "short", year: "numeric"
     });
-    dateTimeEl.textContent = `🗓️ ${today}`;
+    if (dateTimeEl) dateTimeEl.textContent = `🗓️ ${today}`;
   }
   updateDateLabel();
 
+  // ===========================
+  // 🔊 Sound Effects + Music
+  // ===========================
+  let soundOn = true;
+  const sounds = {
+    correct: new Audio("assets/sounds/correct.mp3"),
+    present: new Audio("assets/sounds/present.mp3"),
+    clue: new Audio("assets/sounds/clue.mp3"),
+  };
+  function updateSoundButtons() {
+    const label = soundOn ? "🔊 Sound On" : "🔇 Sound Off";
+    if (introSoundToggle) introSoundToggle.textContent = label;
+    if (navSoundToggle) navSoundToggle.textContent = label;
+  }
+  function toggleSound() {
+    soundOn = !soundOn;
+    if (bgMusic) {
+      try { if (soundOn) bgMusic.play(); else bgMusic.pause(); } catch {} // ignore autoplay errors
+    }
+    updateSoundButtons();
+  }
+  if (introSoundToggle) introSoundToggle.addEventListener("click", toggleSound);
+  if (navSoundToggle) navSoundToggle.addEventListener("click", toggleSound);
 
   // ===========================
-// 📢 Modal Logic for Nav Buttons
-// ===========================
-
-// How to Play button
-howToBtn.addEventListener("click", () => {
-  modal.classList.remove("hidden");
-  modal.classList.add("active");
-});
-
-// Leaderboard button
-leaderboardBtn.addEventListener("click", () => {
-  const leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
-  dynamicPanel.innerHTML = `
-    <h2>🏆 Leaderboard</h2>
-    <ol>
-      ${leaderboard.map((entry, i) =>
-        `<li>${i === 0 ? "👑 " : ""}${entry.name}: ${entry.score}</li>`
-      ).join("")}
-    </ol>
-  `;
-  dynamicPanel.classList.add("show");
-});
-
-// ===========================
-// 🏆 Leaderboard Modal Logic
-// ===========================
-saveNameBtn.addEventListener("click", () => {
-  const name = playerNameInput.value.trim();
-  if (name) {
-    const leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
-    leaderboard.push({ name, score });
-    localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+  // 📅 Daily Puzzle Tracking
+  // ===========================
+  function hasPlayedToday() {
+    const today = new Date().toISOString().slice(0, 10);
+    return localStorage.getItem("dailyPlayed") === today;
   }
-  leaderboardModal.classList.add("hidden");
-  endgameOverlay.classList.add("hidden"); // hide overlay too if open
-  startNewGame();
-});
-
-skipNameBtn.addEventListener("click", () => {
-  leaderboardModal.classList.add("hidden");
-  endgameOverlay.classList.add("hidden");
-  startNewGame();
-});
-
-// Points / History button
-pointsBtn.addEventListener("click", () => {
-  const history = JSON.parse(localStorage.getItem("gameHistory")) || [];
-  dynamicPanel.innerHTML = `
-    <h2>📜 Game History</h2>
-    <ul>
-      ${history.map(h => `
-        <li>${h.date} — ${h.win ? "✅ Solved" : "❌ Failed"} in ${h.attempts} tries
-        <span class="bonus">+${h.scoreEarned}</span> ${h.daily ? "📅 Daily" : "🎲 Random"}</li>
-      `).join("")}
-    </ul>
-  `;
-  dynamicPanel.classList.add("show");
-});
-closeModalBtn.addEventListener("click", () => {
-  modal.classList.add("hidden");
-  modal.classList.remove("active");
-});
-
+  function markDailyPlayed() {
+    const today = new Date().toISOString().slice(0, 10);
+    localStorage.setItem("dailyPlayed", today);
+  }
 
   // ===========================
   // 🧠 Word Bank
@@ -178,24 +125,21 @@ closeModalBtn.addEventListener("click", () => {
       validGuesses = [...new Set([...validGuesses, ...words])];
     })
     .catch(() => {
-      clueFeedback.textContent = "⚠️ Dictionary failed to load, using defaults.";
+      showClue("⚠️ Dictionary failed to load, using defaults.");
     });
 
   function getRandomWord() {
     const filtered = validGuesses.filter(w => w.length === 5);
     return filtered[Math.floor(Math.random() * filtered.length)];
   }
-
   function getDailySeed() {
     const today = new Date();
     return today.getUTCFullYear() * 10000 + (today.getUTCMonth() + 1) * 100 + today.getUTCDate();
   }
-
   function seededRandom(seed) {
     const x = Math.sin(seed) * 10000;
     return x - Math.floor(x);
   }
-
   function getDailyWord() {
     const filtered = validGuesses.filter(w => w.length === 5);
     const idx = Math.floor(seededRandom(getDailySeed()) * filtered.length);
@@ -210,19 +154,28 @@ closeModalBtn.addEventListener("click", () => {
   let targetWord = getDailyWord().toUpperCase();
   let score = parseInt(localStorage.getItem("score")) || 0;
   let streak = parseInt(localStorage.getItem("streak")) || 0;
-  let rewardedYellows = new Set();
-  let rewardedGreens = new Set();
+  const rewardedYellows = new Set();
+  const rewardedGreens = new Set();
   let gameOver = false;
 
   function updateScoreDisplay() {
-    scoreDisplay.textContent = score;
-    scoreDisplay.classList.add("pulse");
-    setTimeout(() => scoreDisplay.classList.remove("pulse"), 300);
+    const mobileScore = document.getElementById("mobile-score");
+    if (mobileScore) mobileScore.textContent = `Score: ${score}`;
+
+    if (scoreDisplay) {
+      scoreDisplay.textContent = score;
+      scoreDisplay.classList.add("pulse");
+      setTimeout(() => scoreDisplay.classList.remove("pulse"), 300);
+    }
+
     localStorage.setItem("score", score);
     localStorage.setItem("streak", streak);
+
+    if (scorePanel) scorePanel.textContent = `Score: ${score}`;
   }
 
   function showScoreFloat(amountOrText, color = "#44ff44", anchorEl = scoreDisplay) {
+    if (!anchorEl) return;
     const float = document.createElement("div");
     float.className = "score-float";
     float.textContent = typeof amountOrText === "number"
@@ -241,6 +194,7 @@ closeModalBtn.addEventListener("click", () => {
   }
 
   function createEmptyGrid() {
+    if (!grid) return;
     grid.innerHTML = "";
     for (let row = 0; row < 6; row++) {
       const rowDiv = document.createElement("div");
@@ -255,38 +209,41 @@ closeModalBtn.addEventListener("click", () => {
     }
   }
 
+  // ===========================
+  // 🔁 New Game
+  // ===========================
   function startNewGame() {
-  if (isDailyMode) {
-    if (hasPlayedToday()) {
-      // Try to restore yesterday's grid
-      if (restoreDailyGridIfPlayed()) return;
-      clueFeedback.textContent = "📅 You've already played today's puzzle!";
-      gameOver = true; // lock input
-      return;          // leave grid untouched
+    if (isDailyMode) {
+      if (hasPlayedToday()) {
+        if (restoreDailyGridIfPlayed()) return;
+        showClue("📅 You've already played today's puzzle!");
+        gameOver = true;
+        return;
+      }
+      targetWord = getDailyWord().toUpperCase();
+      gameOver = false;
+      createEmptyGrid();
+    } else {
+      targetWord = getRandomWord().toUpperCase();
+      createEmptyGrid();
+      gameOver = false;
     }
-    targetWord = getDailyWord().toUpperCase();
-    gameOver = false;  // allow typing for fresh daily
-  } else {
-    targetWord = getRandomWord().toUpperCase();
-    createEmptyGrid(); // random mode always resets
-    gameOver = false;  // allow typing
-  }
 
-  currentRow = 0;
-  updateScoreDisplay();
-  clueFeedback.textContent = "";
-  newGameBtn.classList.add("hidden");
-  restartBtn.classList.remove("attention");
-  keys.forEach(key => key.classList.remove("correct", "present", "absent"));
-  rewardedYellows.clear();
-  rewardedGreens.clear();
-}
+    currentRow = 0;
+    updateScoreDisplay();
+    showClue("");
+    if (restartBtn) restartBtn.classList.remove("attention");
+    keys.forEach(key => key.classList.remove("correct", "present", "absent"));
+    rewardedYellows.clear();
+    rewardedGreens.clear();
+  }
 
   // ===========================
   // 🎯 Guess Rendering Logic
   // ===========================
   function renderGuess(guess, rowIndex) {
     const row = document.querySelectorAll(".guess-row")[rowIndex];
+    if (!row) return;
     const tiles = row.querySelectorAll(".tile");
 
     const targetArr = [...targetWord];
@@ -294,9 +251,9 @@ closeModalBtn.addEventListener("click", () => {
     const counts = {};
     targetArr.forEach(l => counts[l] = (counts[l] || 0) + 1);
 
-        let correctCount = 0;
+    let correctCount = 0;
 
-    // First pass: mark correct letters
+    // First pass
     for (let i = 0; i < 5; i++) {
       const letter = guessArr[i];
       tiles[i].textContent = letter;
@@ -309,18 +266,17 @@ closeModalBtn.addEventListener("click", () => {
         sounds.correct?.play();
         counts[letter] -= 1;
         correctCount++;
-
         if (!rewardedGreens.has(letter)) {
           score += 2;
           rewardedGreens.add(letter);
           showScoreFloat(2, "#44ff44", tiles[i]);
         }
       } else {
-        tiles[i].setAttribute("data-state", "absent"); // provisional
+        tiles[i].setAttribute("data-state", "absent");
       }
     }
 
-    // Second pass: mark present vs absent (respect duplicates)
+    // Second pass
     for (let i = 0; i < 5; i++) {
       const letter = guessArr[i];
       const state = tiles[i].getAttribute("data-state");
@@ -331,7 +287,6 @@ closeModalBtn.addEventListener("click", () => {
         updateKeyboard(letter, "present");
         sounds.present?.play();
         counts[letter] -= 1;
-
         if (!rewardedYellows.has(letter)) {
           score += 1;
           rewardedYellows.add(letter);
@@ -340,11 +295,11 @@ closeModalBtn.addEventListener("click", () => {
       } else {
         tiles[i].setAttribute("data-state", "absent");
         updateKeyboard(letter, "absent");
-        sounds.absent?.play();
       }
     }
 
     updateScoreDisplay();
+    
 
     if (correctCount === 5) {
       // Win
@@ -354,19 +309,17 @@ closeModalBtn.addEventListener("click", () => {
       score += earned;
       showScoreFloat("🔥 Streak +" + streak, "#ff8800", scoreDisplay);
       showScoreFloat(earned, "#00ffcc", scoreDisplay);
-      clueFeedback.textContent = `🎉 Solved in ${currentRow + 1} rows! Bonus +${bonus}`;
+      showClue(`🎉 Solved in ${currentRow + 1} rows! Bonus +${bonus}`);
       updateScoreDisplay();
       saveGameResult(true, currentRow + 1, earned);
 
-      if (isDailyMode) markDailyPlayed();
-      saveDailyGrid();
-      leaderboardModal.classList.remove("hidden");
-      playerNameInput.value = "";
-      playerNameInput.focus();
-      markDailyPlayed();
-      gameOver = true; // lock input
-      showEndgameModal(true, targetWord);
+      if (isDailyMode) {
+        markDailyPlayed();
+        saveDailyGrid();
+      }
 
+      gameOver = true;
+      showEndgameModal(true, targetWord);
     }
     else if (currentRow === 5) {
       // Loss
@@ -374,71 +327,186 @@ closeModalBtn.addEventListener("click", () => {
         streak = 0;
         updateScoreDisplay();
         saveGameResult(false, 6, 0);
-        if (isDailyMode) markDailyPlayed();
-        saveDailyGrid();
+
+        if (isDailyMode) {
+          markDailyPlayed();
+          saveDailyGrid();
+        }
+
         showEndgameModal(false, targetWord);
       }, 600);
-      gameOver = true; // lock input
-
+      gameOver = true;
     }
   }
 
-  // ===========================
-// 💾 Save & Restore Daily Grid
 // ===========================
-function saveDailyGrid() {
-  const rows = [];
-  document.querySelectorAll(".guess-row").forEach(row => {
-    const tiles = Array.from(row.querySelectorAll(".tile")).map(tile => ({
-      letter: tile.textContent,
-      state: tile.getAttribute("data-state")
-    }));
-    rows.push(tiles);
+// 📊 Player Data & Results
+// ===========================
+
+let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+leaderboard = leaderboard.slice(0, 5); // keep top 5
+
+let history = JSON.parse(localStorage.getItem("history")) || [];
+history = history.slice(-5); // keep last 5
+
+
+function recordGameResult(word, win, points, playerName = "Anonymous") {
+  history.push({
+    word,
+    result: win ? "Win" : "Loss",
+    points,
+    date: new Date().toLocaleString()
   });
-  localStorage.setItem("dailyGrid", JSON.stringify(rows));
-  localStorage.setItem("dailyDate", new Date().toDateString());
+
+
+  // Keep only the last 5 games
+  if (history.length > 5) {
+    history = history.slice(-5);
+  }
+
+
+  if (win) {
+    streak++;
+    score += points;
+
+    if (playerName !== "Anonymous") {
+      localStorage.setItem("playerName", playerName);
+    }
+
+    // Add/update leaderboard entry
+    leaderboard.push({ name: playerName, score, streak });
+    leaderboard.sort((a, b) => b.score - a.score);
+    leaderboard = leaderboard.slice(0, 5); // ✅ keep top 5
+
+    localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+  } else {
+    streak = 0;
+  }
+
+  // Save trimmed history
+  localStorage.setItem("history", JSON.stringify(history));
+  updateScoreDisplay();
 }
 
-function restoreDailyGridIfPlayed() {
-  const savedDate = localStorage.getItem("dailyDate");
-  const today = new Date().toDateString();
+// ===========================
+// 🏆 Leaderboard Update
+// ===========================
 
-  if (savedDate === today) {
-    const rows = JSON.parse(localStorage.getItem("dailyGrid")) || [];
-    grid.innerHTML = "";
-    rows.forEach(rowData => {
-      const rowDiv = document.createElement("div");
-      rowDiv.classList.add("guess-row");
-      rowData.forEach(tileData => {
-        const tile = document.createElement("div");
-        tile.classList.add("tile");
-        tile.textContent = tileData.letter;
-        tile.setAttribute("data-state", tileData.state || "empty");
-        rowDiv.appendChild(tile);
+function updateLeaderboard() {
+  const container = document.getElementById("leaderboard-content");
+  container.innerHTML = leaderboard.length === 0
+    ? "<p>No scores yet.</p>"
+    : leaderboard.map((entry, i) => `
+        <div class="leaderboard-card">
+          <h3>${i+1}. ${entry.name}</h3>
+          <span class="score">${entry.score} pts</span>
+          ${entry.streak ? `<span class="streak">🔥 ${entry.streak}</span>` : ""}
+        </div>
+      `).join("");
+}
+
+// ===========================
+// 📜 History Update
+// ===========================
+
+function updateHistory() {
+  if (!historyContent) return;
+
+  let arr = JSON.parse(localStorage.getItem("history")) || [];
+  arr = arr.slice(-5); // enforce last 5 on load too
+
+  historyContent.innerHTML = arr.length === 0
+    ? "<p>No games played yet.</p>"
+    : arr.map(game => `
+        <div class="history-card ${game.result === "Win" ? "win" : "loss"}">
+          <h3>${game.result === "Win" ? "✅ Win" : "❌ Loss"}</h3>
+          <p>Word: ${game.word} • Points: ${game.points}</p>
+          <span class="date">${game.date}</span>
+        </div>
+      `).join("");
+}
+
+
+
+  // ===========================
+  // 🏆 Modal buttons
+  // ===========================
+  if (btnLeaderboard) {
+    btnLeaderboard.onclick = () => {
+      updateLeaderboard();
+      leaderboardOverlay.classList.remove("hidden");
+      leaderboardOverlay.classList.add("active");
+    };
+  }
+  if (btnPoints) {
+    btnPoints.onclick = () => {
+      updateHistory();
+      historyOverlay.classList.remove("hidden");
+      historyOverlay.classList.add("active");
+    };
+  }
+
+  // ===========================
+  // 💾 Save & Restore Daily Grid
+  // ===========================
+  function saveDailyGrid() {
+    const rows = [];
+    document.querySelectorAll(".guess-row").forEach(row => {
+      const tiles = Array.from(row.querySelectorAll(".tile")).map(tile => ({
+        letter: tile.textContent,
+        state: tile.getAttribute("data-state")
+      }));
+      rows.push(tiles);
+    });
+    localStorage.setItem("dailyGrid", JSON.stringify(rows));
+    localStorage.setItem("dailyDate", new Date().toDateString());
+  }
+
+  function restoreDailyGridIfPlayed() {
+    const savedDate = localStorage.getItem("dailyDate");
+    const today = new Date().toDateString();
+
+    if (savedDate === today) {
+      const rows = JSON.parse(localStorage.getItem("dailyGrid")) || [];
+      if (!grid) return false;
+      grid.innerHTML = "";
+      rows.forEach(rowData => {
+        const rowDiv = document.createElement("div");
+        rowDiv.classList.add("guess-row");
+        rowData.forEach(tileData => {
+          const tile = document.createElement("div");
+          tile.classList.add("tile");
+          tile.textContent = tileData.letter;
+          tile.setAttribute("data-state", tileData.state || "empty");
+          rowDiv.appendChild(tile);
+        });
+        grid.appendChild(rowDiv);
       });
-      grid.appendChild(rowDiv);
-    });
-    clueFeedback.textContent = "📅 You've already played today's puzzle!";
-    gameOver = true; // lock input
-    return true;
+      showClue("📅 You've already played today's puzzle!");
+      gameOver = true;
+      return true;
+    }
+    return false;
   }
-  return false;
-}
 
-  // ===========================
-  // 📝 Save Game Results
-  // ===========================
   function saveGameResult(win, attempts, scoreEarned) {
-    const history = JSON.parse(localStorage.getItem("gameHistory")) || [];
-    history.push({
-      date: new Date().toLocaleString(),
-      win,
-      attempts,
-      scoreEarned,
-      daily: isDailyMode
-    });
-    localStorage.setItem("gameHistory", JSON.stringify(history));
-  }
+  const historyArr = JSON.parse(localStorage.getItem("gameHistory")) || [];
+
+  // Add the new result
+  historyArr.push({
+    date: new Date().toLocaleString(),
+    win,
+    attempts,
+    scoreEarned,
+    daily: isDailyMode
+  });
+
+  // Keep only the last 5 entries
+  const trimmed = historyArr.slice(-5);
+
+  // Save the trimmed array
+  localStorage.setItem("gameHistory", JSON.stringify(trimmed));
+}
 
   // ===========================
   // ⌨️ Keyboard Input
@@ -452,7 +520,8 @@ function restoreDailyGridIfPlayed() {
   }
 
   function handleKeyInput(key) {
-     if (gameOver) return;
+    if (gameOver) return;
+
     const keyBtn = document.querySelector(`.key[data-key="${key}"]`);
     if (keyBtn) {
       keyBtn.classList.add("pressed");
@@ -471,9 +540,12 @@ function restoreDailyGridIfPlayed() {
     } else if (key === "Enter" && filled === 5) {
       const guess = Array.from(tiles).map(t => t.textContent).join("");
       if (!validGuesses.includes(guess.toUpperCase())) {
-        clueFeedback.textContent = "❌ Not a valid word!";
-        clueFeedback.classList.add("shake", "fade");
-        setTimeout(() => clueFeedback.classList.remove("shake", "fade"), 600);
+        showClue("❌ Not a valid word!");
+        const targetFB = isMobileView() ? clueFeedbackMobile : clueFeedbackDesktop;
+        if (targetFB) {
+          targetFB.classList.add("shake");
+          setTimeout(() => targetFB.classList.remove("shake"), 600);
+        }
         return;
       }
       renderGuess(guess.toUpperCase(), currentRow);
@@ -481,9 +553,7 @@ function restoreDailyGridIfPlayed() {
     } else if (/^[A-Z]$/.test(key) && filled < 5) {
       tiles[filled].textContent = key;
     }
-   
   }
-
 
   document.addEventListener("keydown", (e) => {
     if (gameOver) return;
@@ -505,30 +575,157 @@ function restoreDailyGridIfPlayed() {
   });
 
   // ===========================
-// 🎬 Endgame Modal Logic
-// ===========================
-function showEndgameModal(win, word) {
+  // 📢 Modal Logic
+  // ===========================
+  if (btnHowto) {
+    btnHowto.onclick = () => {
+      modalOverlay.classList.remove("hidden");
+      modalOverlay.classList.add("active");
+    };
+  }
+  if (closeModal) {
+    closeModal.onclick = () => {
+      modalOverlay.classList.remove("active");
+      modalOverlay.classList.add("hidden");
+    };
+  }
+
+  if (btnLeaderboard && leaderboardOverlay) {
+    btnLeaderboard.addEventListener("click", () => {
+      leaderboardOverlay.classList.remove("hidden");
+      leaderboardOverlay.classList.add("active");
+    });
+  }
+  if (closeLeaderboard && leaderboardOverlay) {
+    closeLeaderboard.addEventListener("click", () => {
+      leaderboardOverlay.classList.remove("active");
+      leaderboardOverlay.classList.add("hidden");
+    });
+  }
+
+  if (btnPoints && historyOverlay) {
+    btnPoints.addEventListener("click", () => {
+      historyOverlay.classList.remove("hidden");
+      historyOverlay.classList.add("active");
+    });
+  }
+  if (closeHistory && historyOverlay) {
+    closeHistory.addEventListener("click", () => {
+      historyOverlay.classList.remove("active");
+      historyOverlay.classList.add("hidden");
+    });
+  }
+
+  if (leaderboardOverlay) {
+    leaderboardOverlay.addEventListener("click", e => {
+      if (e.target === leaderboardOverlay) {
+        leaderboardOverlay.classList.remove("active");
+        leaderboardOverlay.classList.add("hidden");
+      }
+    });
+  }
+  if (historyOverlay) {
+    historyOverlay.addEventListener("click", e => {
+      if (e.target === historyOverlay) {
+        historyOverlay.classList.remove("active");
+        historyOverlay.classList.add("hidden");
+      }
+    });
+  }
+  if (modalOverlay) {
+    modalOverlay.addEventListener("click", e => {
+      if (e.target === modalOverlay) {
+        modalOverlay.classList.remove("active");
+        modalOverlay.classList.add("hidden");
+      }
+    });
+  }
+
+  // ===========================
+  // 🎬 Endgame Modal Logic
+  // ===========================
+  function showEndgameModal(win, word) {
+  const pointsEarned = win ? 10 : 0;
+  saveGameResult(win, currentRow + 1, pointsEarned);
+
+  const nameInput = document.getElementById("player-name-input");
+
   if (win) {
     endgameTitle.textContent = "🎉 You Won!";
-    endgameMessage.textContent = "Great job, detective!";
+    endgameMessage.textContent = "Legend";
     continueBtn.style.display = "inline-block";
     continueBtn.textContent = "Continue";
     restartBtn.style.display = "none";
+
+    // Show name input
+    if (nameInput) {
+      nameInput.style.display = "block";
+      // Pre-fill with stored name if available
+      const storedName = localStorage.getItem("playerName");
+      if (storedName) nameInput.value = storedName;
+    }
   } else {
-    endgameTitle.textContent = "🕵️ Case Closed";
+    endgameTitle.textContent = " You Failed";
     endgameMessage.textContent = `The word was: ${word}`;
     continueBtn.style.display = "inline-block";
     continueBtn.textContent = "Continue (20 pts)";
     restartBtn.style.display = "inline-block";
-  }
 
+    // Hide name input
+    if (nameInput) nameInput.style.display = "none";
+  }
 
   endgameOverlay.classList.remove("hidden");
 }
 
-// Continue button logic
-continueBtn.addEventListener("click", () => {
-  if (endgameTitle.textContent.includes("You Won")) {
+   // ===========================
+  // 🎬 Endgame Modal Logic
+  // ===========================
+  function showEndgameModal(win, word) {
+  const pointsEarned = win ? 10 : 0;
+
+  saveGameResult(win, currentRow + 1, pointsEarned);
+
+  const nameInput = document.getElementById("player-name-input");
+
+  if (win) {
+    endgameTitle.textContent = "🎉 You Won!";
+    endgameMessage.textContent = "Legend!";
+    continueBtn.style.display = "inline-block";
+    continueBtn.textContent = "Continue";
+    restartBtn.style.display = "none";
+
+    // Show name input
+    if (nameInput) {
+      nameInput.style.display = "block";
+      // Pre-fill with stored name if available
+      const storedName = localStorage.getItem("playerName");
+      if (storedName) nameInput.value = storedName;
+    }
+  } else {
+    endgameTitle.textContent = "🕵️ You Failed";
+    endgameMessage.textContent = `The word was: ${word}`;
+    continueBtn.style.display = "inline-block";
+    continueBtn.textContent = "Continue (20 pts)";
+    restartBtn.style.display = "inline-block";
+
+    // Hide name input
+    if (nameInput) nameInput.style.display = "none";
+  }
+
+  endgameOverlay.classList.remove("hidden");
+}
+
+  continueBtn.addEventListener("click", () => {
+    const nameInput = document.getElementById("player-name-input");
+    const playerName = nameInput && nameInput.value.trim()
+      ? nameInput.value.trim()
+      : "Anonymous";
+
+      if (endgameTitle.textContent.includes("You Won")) {
+    // ✅ Save win
+    recordGameResult(targetWord, true, 10, playerName);
+
     endgameOverlay.classList.add("hidden");
     startNewGame();
   } else {
@@ -536,7 +733,10 @@ continueBtn.addEventListener("click", () => {
     if (score >= costToContinue) {
       score -= costToContinue;
       updateScoreDisplay();
-      showScoreFloat(-costToContinue, "#ff4444", scoreDisplay);
+
+      // ✅ Save loss before continuing
+      recordGameResult(targetWord, false, 0, "Anonymous");
+
       endgameOverlay.classList.add("hidden");
       startNewGame();
     } else {
@@ -546,32 +746,92 @@ continueBtn.addEventListener("click", () => {
       showScoreFloat("❌ Streak Reset", "#ff4444", scoreDisplay);
       endgameMessage.textContent = "Not enough points — you lost all your points!";
       restartBtn.classList.add("attention");
+
+      // ✅ Save loss when player cannot continue
+      recordGameResult(targetWord, false, 0, "Anonymous");
     }
   }
 });
 
-// Restart button logic
-restartBtn.addEventListener("click", () => {
-  endgameOverlay.classList.add("hidden");
-  score = 0;
-  streak = 0;
-  updateScoreDisplay();
-  startNewGame();
-});
-
-
-  // ===========================
-  // 🎬 Intro Screen Logic
-  // ===========================
-  startBtn.onclick = () => {
-    introScreen.classList.add("hidden");
-    if (soundOn) bgMusic.play();
+  restartBtn.addEventListener("click", () => {
+    endgameOverlay.classList.add("hidden");
+    score = 0;
+    streak = 0;
+    updateScoreDisplay();
     startNewGame();
-  };
+  });
 
-  document.getElementById("intro-howto")?.addEventListener("click", () => {
-    modal.classList.remove("hidden");
-    modal.classList.add("active");
+  // ===========================
+  // 🕵️ Clue Purchase Logic
+  // ===========================
+  // Popup open/close
+  if (btnCluePopup && cluePopup) {
+    btnCluePopup.addEventListener("click", () => {
+      cluePopup.classList.remove("hidden");
+      cluePopup.classList.add("active");
+    });
+  }
+  if (closeCluePopup && cluePopup) {
+    closeCluePopup.addEventListener("click", () => {
+      cluePopup.classList.remove("active");
+      cluePopup.classList.add("hidden");
+    });
+  }
+
+  // View helper
+  function isMobileView() {
+    return window.innerWidth <= 768;
+  }
+
+  // Feedback router
+  function showClue(message) {
+    const targetFB = isMobileView() ? clueFeedbackMobile : clueFeedbackDesktop;
+    if (targetFB) targetFB.textContent = message;
+  }
+
+  // Clue button logic
+  clueButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const cost = parseInt(btn.dataset.cost, 10);
+      const type = btn.dataset.type;
+
+      if (score < cost) {
+        showClue("❌ Not enough points!");
+        const targetFB = isMobileView() ? clueFeedbackMobile : clueFeedbackDesktop;
+        if (targetFB) {
+          targetFB.classList.add("shake");
+          setTimeout(() => targetFB.classList.remove("shake"), 600);
+        }
+        return;
+      }
+
+      score -= cost;
+      updateScoreDisplay();
+      showScoreFloat(-cost, "#ff4444", scoreDisplay);
+      sounds.clue?.play();
+
+      let message = "";
+
+      if (type === "reveal-position") {
+        const randIndex = Math.floor(Math.random() * targetWord.length);
+        message = `Position ${randIndex + 1}: ${targetWord[randIndex]}`;
+      } else if (type === "reveal-first") {
+        message = `First letter: ${targetWord[0]}`;
+      } else if (type === "reveal-last") {
+        message = `Last letter: ${targetWord[targetWord.length - 1]}`;
+      } else if (type === "reveal-random") {
+        const r = Math.floor(Math.random() * targetWord.length);
+        message = `Random letter: ${targetWord[r]} (pos ${r + 1})`;
+      } else if (type === "reveal-vowel") {
+        const vowels = ["A", "E", "I", "O", "U"];
+        const found = [...targetWord].filter(ch => vowels.includes(ch));
+        message = found.length
+          ? `Vowel present: ${found[Math.floor(Math.random() * found.length)]}`
+          : "No vowels present.";
+      }
+
+      showClue(message || "No clue available.");
+    });
   });
 
   // ===========================
@@ -579,169 +839,30 @@ restartBtn.addEventListener("click", () => {
   // ===========================
   function setMode(isDaily) {
     isDailyMode = isDaily;
-    btnDaily.classList.toggle("active", isDailyMode);
-    btnRandom.classList.toggle("active", !isDailyMode);
-    clueFeedback.textContent = isDailyMode
-      ? "📅 Daily mode activated"
-      : "🎲 Random mode activated";
+    if (btnDaily) btnDaily.classList.toggle("active", isDailyMode);
+    if (btnRandom) btnRandom.classList.toggle("active", !isDailyMode);
+    showClue(isDailyMode ? "📅 Daily mode activated" : "🎲 Random mode activated");
     startNewGame();
   }
 
-
-  btnDaily.addEventListener("click", (e) => {
-  e.target.blur(); // remove focus so Enter won't re-trigger
-  isDailyMode = true;
-  startNewGame();
-  });
-
-
-  btnRandom.addEventListener("click", (e) => {
-  e.target.blur(); // remove focus
-  isDailyMode = false;
-  startNewGame();
-  });
-
-  btnDaily.addEventListener("click", () => setMode(true));
-  btnRandom.addEventListener("click", () => setMode(false));
-
-  // Initialize mode on load
-  setMode(true);
-
-  // ===========================
-  // 🔁 Game Initialization
-  // ===========================
-  newGameBtn.addEventListener("click", startNewGame);
-  createEmptyGrid();
-  updateScoreDisplay();
-});
-
-
-// ===========================
-// 📱 Mobile Game Flow Logic
-// ===========================
-
-const introScreen = document.getElementById("intro-screen");
-const topNav = document.getElementById("top-nav");
-const modeSelect = document.getElementById("mode-select");
-const gameGrid = document.getElementById("game-grid");
-const keyboard = document.getElementById("keyboard");
-const newGameBtn = document.getElementById("new-game-btn");
-const dailyBtn = document.getElementById("btn-daily");
-const randomBtn = document.getElementById("btn-random");
-
-function isMobileView() {
-  return window.innerWidth <= 768;
-}
-
-// Step 1 → Step 2: Show mode select
-document.getElementById("start-btn").addEventListener("click", () => {
-  if (!isMobileView()) return;
-
-  introScreen.classList.add("hidden");
-  topNav.style.display = "flex";
-  modeSelect.style.display = "flex";
-
-  gameGrid.style.display = "none";
-  keyboard.style.display = "none";
-  newGameBtn.classList.add("hidden");
-});
-
-// Step 2 → Step 3: Launch game
-function launchGame(mode) {
-  if (!isMobileView()) return;
-
-  modeSelect.style.display = "none";
-  gameGrid.style.display = "grid";
-  keyboard.style.display = "flex";
-  newGameBtn.classList.remove("hidden");
-
-  isDailyMode = mode === "daily";
-  startNewGame();
-}
-
-dailyBtn.addEventListener("click", () => launchGame("daily"));
-randomBtn.addEventListener("click", () => launchGame("random"));
-
-// On load: show intro only on mobile
-window.addEventListener("DOMContentLoaded", () => {
-  if (isMobileView()) {
-    introScreen.classList.remove("hidden");
-    topNav.style.display = "none";
-    modeSelect.style.display = "none";
-    gameGrid.style.display = "none";
-    keyboard.style.display = "none";
-    newGameBtn.classList.add("hidden");
+  if (btnDaily) {
+    btnDaily.addEventListener("click", e => { e.target.blur(); setMode(true); });
+  }
+  if (btnRandom) {
+    btnRandom.addEventListener("click", e => { e.target.blur(); setMode(false); });
   }
 
+  // Intro → launch selected mode
+  if (startBtn) {
+    startBtn.addEventListener("click", () => {
+      grid.style.display = "grid";
+      keyboard.style.display = "flex";
+      startNewGame();
+      introScreen.classList.add("hidden");
+      topNav.classList.remove("hidden");
+    });
+  }
 
-
-// ===========================
-// 🧩 Modal Toggle Logic
-// ===========================
-
-// DOM references
-const leaderboardModal = document.getElementById("leaderboard-modal");
-const dynamicPanel = document.getElementById("dynamic-panel");
-const howtoModal = document.getElementById("modal-overlay");
-
-const btnLeaderboard = document.getElementById("btn-leaderboard");
-const btnPoints = document.getElementById("btn-points");
-const btnHowto = document.getElementById("btn-howto");
-
-const skipNameBtn = document.getElementById("skip-name-btn");
-const closeHowtoBtn = document.getElementById("close-modal");
-
-// Show Leaderboard modal
-btnLeaderboard.addEventListener("click", () => {
-  leaderboardModal.classList.remove("hidden");
-});
-
-// Hide Leaderboard modal
-skipNameBtn.addEventListener("click", () => {
-  leaderboardModal.classList.add("hidden");
-});
-
-// Show Game History (dynamic panel)
-btnPoints.addEventListener("click", () => {
-  dynamicPanel.classList.remove("hidden");
-  dynamicPanel.innerHTML = `
-    <h2>Game History</h2>
-    <p>Your recent games will appear here.</p>
-    <button class="nav-btn" id="close-history">Close</button>
-  `;
-
-  // Add close button logic dynamically
-  document.getElementById("close-history").addEventListener("click", () => {
-    dynamicPanel.classList.add("hidden");
-    dynamicPanel.innerHTML = ""; // clean up
-  });
-});
-
-// Show How to Play modal
-btnHowto.addEventListener("click", () => {
-  howtoModal.classList.remove("hidden");
-});
-
-// Hide How to Play modal
-closeHowtoBtn.addEventListener("click", () => {
-  howtoModal.classList.add("hidden");
-});
-
-
- btnLeaderboard.addEventListener("click", () => {
-    leaderboardModal.style.display = "flex";
-  });
-
-  skipNameBtn.addEventListener("click", () => {
-    leaderboardModal.style.display = "none";
-  });
-
-  btnPoints.addEventListener("click", () => {
-    document.getElementById("history-modal").style.display = "flex";
-  });
-
-  document.getElementById("close-history").addEventListener("click", () => {
-    document.getElementById("history-modal").style.display = "none";
-  });
-
+  // Initial mode on load
+  setMode(true);
 });
