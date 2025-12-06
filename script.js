@@ -10,26 +10,29 @@ document.addEventListener("DOMContentLoaded", () => {
   const scoreDisplay = document.getElementById("score");
   const keys = document.querySelectorAll(".key");
 
-  // Overlays
+  // ===========================
+  // 📢 Modal References
+  // ===========================
+
+  // Leaderboard
   const leaderboardOverlay = document.getElementById("leaderboard-overlay");
   const historyOverlay = document.getElementById("history-overlay");
   const leaderboardContent = document.getElementById("leaderboard-content");
-  const historyContent = document.getElementById("history-content");
   const btnLeaderboard = document.getElementById("btn-leaderboard");
-  const btnPoints = document.getElementById("btn-points");
   const closeLeaderboard = document.getElementById("close-leaderboard");
+// History
+  const historyContent = document.getElementById("history-content");
   const closeHistory = document.getElementById("close-history");
+  const btnPoints = document.getElementById("btn-points");
+  // Stats
   const closeStats = document.getElementById("close-stats");
   const btnStats = document.getElementById("btn-stats");
   const statsOverlay = document.getElementById("stats-overlay");
   const statsContent = document.getElementById("stats-content");
-
-
   // How to Play modal
   const btnHowto = document.getElementById("btn-howto");
   const howtoScreen = document.getElementById("howto-screen");
   const closeHowtoScreen = document.getElementById("close-howto-screen")
-
   // Clues (desktop + mobile)
   const clueButtons = document.querySelectorAll(".clue-btn");
   const clueFeedbackMobile = document.getElementById("clue-feedback-mobile");
@@ -316,8 +319,9 @@ document.addEventListener("DOMContentLoaded", () => {
       showScoreFloat("🔥 Streak +" + streak, "#ff8800", scoreDisplay);
       showScoreFloat(earned, "#00ffcc", scoreDisplay);
       showClue(`🎉 Solved in ${currentRow + 1} rows! Bonus +${bonus}`);
-      updateScoreDisplay();
-      saveGameResult(true, currentRow + 1, earned);
+
+      recordGameResult(targetWord, true, earned, currentRow + 1);
+
 
       if (isDailyMode) {
         markDailyPlayed();
@@ -332,7 +336,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         streak = 0;
         updateScoreDisplay();
-        saveGameResult(false, 6, 0);
+        recordGameResult(targetWord, false, 0, 6);
 
         if (isDailyMode) {
           markDailyPlayed();
@@ -354,15 +358,15 @@ let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
 leaderboard = leaderboard.slice(0, 5); // keep top 5
 
 let history = JSON.parse(localStorage.getItem("history")) || [];
-history = history.slice(-5); // keep last 5
 
 
 // Save result after each game
-function recordGameResult(word, win, points, playerName = "Anonymous") {
+function recordGameResult(word, win, points, attempts, playerName = "Anonymous") {
   // Add to history
   history.push({
     word,
     result: win ? "Win" : "Loss",
+    attempts,
     points,
     date: new Date().toLocaleString(),
     mode: isDailyMode ? "Daily" : "Random"
@@ -440,11 +444,11 @@ function updateHistory() {
   if (!historyContent) return;
 
   let arr = JSON.parse(localStorage.getItem("history")) || [];
-  arr = arr.slice(-5); // enforce last 5
+  let recent = arr.slice(-5); // last 5 games only
 
   historyContent.innerHTML = arr.length === 0
     ? "<p>No games played yet.</p>"
-    : arr.map(game => `
+    : recent.map(game => `
         <div class="history-card ${game.result === "Win" ? "win" : "loss"}">
           <h3>${game.result === "Win" ? "✅ Win" : "❌ Loss"}</h3>
           <p>Word: ${game.word} • Game Attempts: ${game.attempts} • Points: ${game.points} • Mode: ${game.mode}</p>
@@ -503,10 +507,7 @@ if (!closeStats) console.warn("Close stats button #close-stats not found in DOM"
 // Open stats modal
 if (btnStats) {
   btnStats.addEventListener("click", () => {
-    // Update content
     updateStatsModal();
-
-    // Show overlay
     if (statsOverlay) {
       statsOverlay.classList.remove("hidden");
       statsOverlay.classList.add("active");
@@ -558,36 +559,46 @@ function updateStatsModal() {
     }
   });
 
-  // Render proportional bars
+  // Render proportional bars into statsContent
   const maxCount = Math.max(...distribution, 1);
-  statsContent.innerHTML = `
-    <div class="stats-grid">
-      <div><strong>Games Played:</strong><br>${gamesPlayed}</div>
-      <div><strong>Win %</strong><br>${winPercent}%</div>
-      <div><strong>Current Streak:</strong><br>${currentStreak}</div>
-      <div><strong>Best Streak:</strong><br>${bestStreakCalc}</div>
-    </div>
+  if (statsContent) {
+    statsContent.innerHTML = `
+  <div class="stats-header">
+    <h2>📊 Your Stats</h2>
+  </div>
 
-    <h3>Guess Distribution</h3>
-    <div class="guess-distribution">
-      ${distribution.map((count, i) => `
+  <div class="stats-metrics">
+    <div class="metric"><span class="label">Played</span><span class="value">${gamesPlayed}</span></div>
+    <div class="metric"><span class="label">Win %</span><span class="value">${winPercent}</span></div>
+    <div class="metric"><span class="label">Current Streak</span><span class="value">${currentStreak}</span></div>
+    <div class="metric"><span class="label">Best Streak</span><span class="value">${bestStreakCalc}</span></div>
+  </div>
+
+  <h3 class="distribution-title">Guess Distribution</h3>
+  <div class="guess-distribution">
+    ${distribution.map((count, i) => {
+      const percent = Math.round((count / maxCount) * 100);
+      return `
         <div class="guess-row">
           <span class="guess-label">${i + 1}</span>
           <div class="guess-bar">
-            <div class="bar-fill" style="width:${(count / maxCount) * 100}%">
+            <div class="bar-fill" style="width:${percent}%">
               ${count}
             </div>
           </div>
         </div>
-      `).join("")}
-    </div>
-  `;
+      `;
+    }).join("")}
+  </div>
+`;
+  } else {
+    console.warn("Stats content #stats-content not found in DOM");
+  }
 
-
-
-  
-  statsOverlay.classList.remove("hidden");
-  statsOverlay.classList.add("active");
+  if (statsOverlay) {
+    statsOverlay.classList.remove("hidden");
+    statsOverlay.classList.add("active");
+  }
 }
 
 // ===========================
@@ -797,26 +808,34 @@ function saveGameResult(win, attempts, scoreEarned) {
     continueBtn.textContent = "Continue";
     restartBtn.style.display = "none";
 
-    // Show name input
     if (nameInput) {
-      nameInput.style.display = "block";
-      // Pre-fill with stored name if available
-      const storedName = localStorage.getItem("playerName");
-      if (storedName) nameInput.value = storedName;
-    }
+  nameInput.style.display = "block";
+  const storedName = localStorage.getItem("playerName");
+  if (storedName) nameInput.value = storedName;
+  }
   } else {
     endgameTitle.textContent = "👎 You Failed";
     endgameMessage.textContent = `The word was: ${word}`;
-    continueBtn.style.display = "inline-block";
-    continueBtn.textContent = "Continue (20 pts)";
-    restartBtn.style.display = "inline-block";
+    if (!isDailyMode) {
+      // random mode
+      continueBtn.style.display = "none";
+      restartBtn.style.display = "inline-block";
+     
+    } else {
+      // daily mode
+      continueBtn.style.display = "inline-block";
+      continueBtn.textContent = "Come back tomorrow!";
+      restartBtn.style.display = "none";
+    }
 
-    // Hide name input
+
     if (nameInput) nameInput.style.display = "none";
   }
 
   endgameOverlay.classList.remove("hidden");
 }
+
+
 
   continueBtn.addEventListener("click", () => {
     const nameInput = document.getElementById("player-name-input");

@@ -100,7 +100,7 @@
         <p>Spend your points to reveal a letter:</p>
         <div class="clue-options">
           <button class="clue-btn" data-cost="10" data-type="reveal-position">
-            <span>Reveal 1 Letter</span>
+            <span>Reveal a Random Letter</span>
             <span class="cost">10 pts</span>
           </button>
           <button class="clue-btn" data-cost="10" data-type="reveal-first">
@@ -128,7 +128,7 @@
   <div class="popup-content">
     <h2 id="clue-title">🔮 Buy a Clue</h2>
     <button class="clue-btn" data-cost="10" data-type="reveal-position">
-      <span>Reveal a random Letter</span>
+      <span>Reveal a Random Letter</span>
       <span class="cost">10 pts</span>
     </button>
     <button class="clue-btn" data-cost="10" data-type="reveal-first">
@@ -168,9 +168,8 @@
   <h3>🔮 Clues</h3>
   <p>Spend points to reveal hints:</p>
   <ul>
-    <li><strong>Reveal 1 Letter</strong> – shows a random unrevealed letter in its correct position.</li>
+    <li><strong>Reveal random Letter</strong> – reveals a letter not already solved in the grid.</li>
     <li><strong>First / Last Letter</strong> – reveals the starting or ending letter.</li>
-    <li><strong>Random Letter</strong> – reveals a letter not already solved in the grid.</li>
   </ul>
   <p class="note">Clues cost points — use them wisely!</p>
 </section>
@@ -179,7 +178,6 @@
   <h3>🏆 Leaderboard</h3>
   <ul>
     <li>Ranks players by total points earned.</li>
-    <li>Gold, silver, bronze borders highlight top 3.</li>
     <li>Your name and score are saved when you win.</li>
   </ul>
 </section>
@@ -220,7 +218,6 @@
 <!-- Stats Modal -->
 <div id="stats-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="stats-title">
   <div class="modal-content">
-    <h2 id="stats-title">📊 Your Stats</h2>
     <div id="stats-content"></div>
     <button id="close-stats" class="modal-close">Close</button>
   </div>
@@ -261,7 +258,7 @@
   </div>
  
 
-  <script src="data/wordBank.js"></script>
+  <script type="module" src="data/wordBank.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
