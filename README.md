@@ -304,34 +304,29 @@ Testing FAFO ensures gameplay, accessibility, and performance remain consistent 
 - **Game Logic**
   - Verify guesses are validated against `dictionary.txt`.
   - Confirm `wordBank.js` fetches words correctly from `dictionary.txt`.
+  - Test to returns a valid five‑letter word from `dictionary.txt`.
   - Confirm tile feedback (`correct`, `present`, `absent`) updates visually.
   - Test scoring system: points awarded for correct guesses, deducted for clue purchases.
   - Ensure overlays (intro, clue popup, endgame) trigger at the right times.
 
 Screenshot: ![Game Logic](/assets/images/screenshot-game-logic.png)
 
-- **Word Bank & Dictionary**
-  - Confirm `wordBank.js` fetches words correctly from `dictionary.txt`.
-  - Test `getRandomSolution()` returns a valid five‑letter word.
-  - Validate `isValidGuess()` rejects invalid entries and accepts dictionary words.
-
-<!-- 📸 Add screenshot of console log showing random solution + validation -->
 
 - **Stats & History**
   - Check games played, win rate, streaks, and guess distribution update after each session.
   - Verify persistence in `localStorage` across browser refreshes.
 
 Screenshot: ![StatsPanel](/assets/images/Screenshot-stats-panel.png)
+Screenshot: ![Historypanel](/assets/images/Screenshot-history-panel.png)
 
 ---
 
 ### 2. Accessibility Testing
 - **Keyboard Navigation**
-  - Play the game entirely with keyboard input (no mouse).
+  - Play the game almost entirely with keyboard input.
   - Confirm focus moves correctly between grid, keyboard, and overlays.
   - Ensure Enter key does not “stick” to buttons after use.
 
-<!-- 📸 Add screenshot of focus outline on grid/keyboard -->
 
 - **Screen Reader Compatibility**
   - Test with NVDA, JAWS, or VoiceOver.

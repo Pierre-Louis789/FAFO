@@ -192,6 +192,7 @@
       <!-- Stats Modal -->
       <div id="stats-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="stats-title">
         <div class="modal-content">
+          <h2 id="stats-title">📊 Stats</h2>
           <div id="stats-content"></div>
           <button id="close-stats" class="modal-close">Close</button>
         </div>
@@ -215,11 +216,11 @@
     <!-- Endgame Overlay -->
     <div id="endgame-overlay" class="endgame-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="endgame-title">
       <div id="endgame-content">
-        <h2 id="endgame-title"></h2>
+        <h2 id="endgame-title"aria-live="polite"></h2>
         <p id="endgame-message"></p>
 
         <!-- Player name input -->
-        <input id="player-name-input" type="text" placeholder="Enter your name" />
+       <input id="player-name-input" type="text" aria-label="Player name" placeholder="Enter your name"/>
         <div class="endgame-buttons">
           <button id="continue-btn" class="nav-btn">Continue</button>
           <button id="restart-btn" class="nav-btn">Restart</button>
