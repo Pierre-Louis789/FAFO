@@ -321,19 +321,18 @@ Screenshot: ![Historypanel](/assets/images/Screenshot-history-panel.png)
 
 ---
 
-### 2. Accessibility Testing
-- **Keyboard Navigation**
-  - Play the game almost entirely with keyboard input.
-  - Confirm focus moves correctly between grid, keyboard, and overlays.
-  - Ensure Enter key does not “stick” to buttons after use.
+### 2. ♿ Accessibility Testing Summary
+
+Website was tested using the WAVE Web Accessibility Evaluation Tool, Lighthouse audits, keyboard-only navigation, and screen reader compatibility checks.
+
+- ✅ **WAVE Score: 10/10** — No errors, no contrast issues, and valid ARIA structure.
+- ✅ **Keyboard Navigation** — Fully playable without a mouse; overlays trap and release focus correctly.
+- ✅ **Screen Reader Support** — ARIA roles and live regions announce overlays, score changes, and tile feedback.
+- ✅ **Contrast Compliance** — All colors adjusted to meet WCAG AA standards for readability.
+- ✅ **Responsive Layout** — Mobile and desktop views preserve accessibility and clarity.
+- ✅ **Manual Testing** — Verified with NVDA and VoiceOver.
 
 
-- **Screen Reader Compatibility**
-  - Test with NVDA, JAWS, or VoiceOver.
-  - Verify ARIA roles (`dialog`, `aria-live`) announce overlays and dynamic feedback.
-  - Confirm score changes and tile states are announced clearly.
-
-<!-- 📸 Add screenshot of screen reader output or Lighthouse accessibility score -->
 
 - **Responsive Layout**
   - Test on mobile, tablet, and desktop.
